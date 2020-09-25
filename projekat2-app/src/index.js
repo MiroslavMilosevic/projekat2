@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import {v1 as uuid} from 'uuid'
 import { BrowserRouter as Router, Switch, Route, Link, Redirect, useParams } from 'react-router-dom'
-import {getInfo} from './services'
-import {Navi, Home, Club, Login} from './components'
+import {getInfo, getImena} from './services'
+import {Navi, Home, Club, Login, Register} from './components'
+import {ParagrafS2} from './style'
 
 
 
@@ -16,7 +17,10 @@ useEffect(()=>{
 getInfo().then(res=>{
 console.log(res.data.nizLokala);
 setNiz(res.data.nizLokala);
-
+})
+getImena().then(res=>{
+setNizUsera(res.data.nizImena);
+console.log(res.data.nizImena);
 })
 },[])
   return(
@@ -36,10 +40,11 @@ setNiz(res.data.nizLokala);
            </Login>
           </Route>
           <Route exact path="/register">
-          
+          <Register nizUsera={nizUsera} setNizUsera={setNizUsera}></Register>
           </Route>
           <Route exact path="/one/:id">
-          <Club niz={niz} setNiz={setNiz}></Club>
+
+          {localStorage.getItem('user')=== ''? <ParagrafS2>Niste Ulogovani</ParagrafS2> : <Club niz={niz} setNiz={setNiz}></Club>}
           </Route>
         </Switch>
       </Router>

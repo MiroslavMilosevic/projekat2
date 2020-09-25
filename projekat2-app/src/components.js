@@ -7,15 +7,18 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Switch, Route, Link, Redirect, useParams, useHistory } from 'react-router-dom'
 import {v1 as uuid } from 'uuid'
 import {postProvera} from './functions';
-import {getInfo, postComent, postLike} from './services';
+import {getImena, getInfo, postComent, postLike, registerUser} from './services';
 
 
 export const Navi=()=>{
+    const history=useHistory();
     return(
  <>
 <StyledNav>
     <LinkS to='/home'>Home</LinkS> 
-    <LinkS to='/login'>Login</LinkS> 
+
+    {localStorage.getItem('user')===''? <LinkS to='/login'>Login</LinkS>: <LinkS onClick={
+        ()=>{localStorage.setItem('user', ''); history.push('/home');window.location.reload(); }} to='/home'>Log out</LinkS>} 
     <LinkS to='other'>Other</LinkS> 
 </StyledNav>
     </>
@@ -60,12 +63,17 @@ export const Club=({niz, setNiz})=>{
            <ParagrafS2>Rating:{club.rating}</ParagrafS2>
            <DivSImg src={club.img} alt={'nema slike'}></DivSImg>
            <ButtonKom onClick={()=>{console.log('das');
-           postLike('true',club.id).then(
+            let covek=localStorage.getItem('user');
+            if(covek!==localStorage.getItem(`like${covek}${club.id}`)){
+                localStorage.setItem(`like${covek}${club.id}`, covek);
+           postLike(club.id).then(
             getInfo().then(res=>{
                 setNiz(res.data.nizLokala)
             })
            )
-        
+            }else {
+                console.log('vec lajkovano');
+            }
         
         }}>Like</ButtonKom>
            <InputKom placeholder='komentarisite' onChange={(e)=>{setKomentar(e.target.value)}}></InputKom>
@@ -92,19 +100,75 @@ export const Club=({niz, setNiz})=>{
     )
 }
 
-export const Login=({niz, setNiz})=>{
-
+export const Login=({nizUsera, setNizUsera})=>{
+      const [username,setUsername] = useState('');
+      const [password,setPassword] = useState('');
       const history=useHistory();
     return(
         <>
           <LoginStyledDiv>
-              <LoginStyledInput1 type='text' placeholder='username'></LoginStyledInput1>
-              <LoginStyledInput2 type='password' placeholder='username'></LoginStyledInput2>
+              <LoginStyledInput1 onChange={(e)=> setUsername(e.target.value)} type='text' placeholder='username'></LoginStyledInput1>
+              <LoginStyledInput2 onChange={(e)=> setPassword(e.target.value)} type='password' placeholder='password'></LoginStyledInput2>
               <br/>
-              <LoginStyledButton>Uloguj se</LoginStyledButton>
-              <LoginStyledButton>Registruj se</LoginStyledButton>
+              <LoginStyledButton onClick={()=>{
+                  console.log('blabla');
+                  for(let i=0;i<nizUsera.length;i++){
+                    console.log(nizUsera[i].username);
+                    console.log(username);
+                    console.log(nizUsera[i].password);
+                    console.log(password);
+                      if(nizUsera[i].username===username&&nizUsera[i].password===password){
+                          console.log('desilo se');
+                             localStorage.setItem('user', username);
+                             history.push('/home')
+                             window.location.reload();
+                                    
+                      }
+                  }
+              }}>Uloguj se</LoginStyledButton>
+              <LoginStyledButton onClick={()=>{history.push('/register')}}>Registruj se</LoginStyledButton>
               </LoginStyledDiv>         
         
         </>
     )
+}
+
+export const Register=({nizUsera, setNizUsera})=>{
+    const [username,setUsername] = useState('');
+    const [password,setPassword] = useState('');
+    const history=useHistory();
+  return(
+      <>
+        <LoginStyledDiv>
+            <LoginStyledInput1 onChange={(e)=> setUsername(e.target.value)} type='text' placeholder='username'></LoginStyledInput1>
+            <LoginStyledInput2 onChange={(e)=> setPassword(e.target.value)} type='password' placeholder='username'></LoginStyledInput2>
+            <br/>
+            <LoginStyledButton onClick={()=>{
+                let br=0;
+                for(let i=0;i<nizUsera.length;i++){
+                    if(nizUsera[i].username===username){
+               
+                    br++;
+                              console.log('korisnik vec postoji');      
+                    }
+                }
+                if(br===0){
+                    registerUser(username.trim(), password.trim()).then(res=>{
+                              getImena().then(res=>{
+                                setNizUsera(res.data.nizImena);
+                                localStorage.setItem('user', username);
+                                history.push('/home')
+                                window.location.reload();
+                    console.log('upesno registrovan korisnik');
+                            
+                             })
+    
+                        })           
+                }
+            }}>Registruj se</LoginStyledButton>
+           
+            </LoginStyledDiv>         
+      
+      </>
+  )
 }

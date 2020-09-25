@@ -12,8 +12,19 @@ export function postComent(comment, id){
    
 }
 
-export function postLike(like, id){
+export function postLike(id){
 
    return axios.get('http://localhost:8080/MiroslavServerZaJS/ServletLike?like=true&id='+id);
+   
+}
+
+export function getImena(){
+
+   return axios.get('http://localhost:8080/MiroslavServerZaJS/ServletImena');
+   
+}
+export function registerUser(username, password){
+
+   return axios.get('http://localhost:8080/MiroslavServerZaJS/ServletRegister?username='+username+'&password='+password);
    
 }
